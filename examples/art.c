@@ -1,6 +1,8 @@
 #include "darknet.h"
-
+#ifdef _WIN32
+#else
 #include <sys/time.h>
+#endif
 
 void demo_art(char *cfgfile, char *weightfile, int cam_index)
 {

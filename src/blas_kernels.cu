@@ -777,43 +777,43 @@ __global__ void weighted_sum_kernel(int n, float *a, float *b, float *s, float *
     }
 }
 
-__global__ void deinter_kernel(int NX, float *X, int NY, float *Y, int B, float *OUT)
+__global__ void deinter_kernel(int NX, float *X, int NY, float *Y, int B, float *_OUT)
 {
     int i = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
     if(i < (NX+NY)*B){
         int b = i / (NX+NY);
         int j = i % (NX+NY);
         if (j < NX){
-            if(X) X[b*NX + j] += OUT[i];
+            if(X) X[b*NX + j] += _OUT[i];
         } else {
-            if(Y) Y[b*NY + j - NX] += OUT[i];
+            if(Y) Y[b*NY + j - NX] += _OUT[i];
         }
     }
 }
 
-extern "C" void deinter_gpu(int NX, float *X, int NY, float *Y, int B, float *OUT)
+extern "C" void deinter_gpu(int NX, float *X, int NY, float *Y, int B, float *_OUT)
 {
-    deinter_kernel<<<cuda_gridsize((NX+NY)*B), BLOCK>>>(NX, X, NY, Y, B, OUT);
+    deinter_kernel<<<cuda_gridsize((NX+NY)*B), BLOCK>>>(NX, X, NY, Y, B, _OUT);
     check_error(cudaPeekAtLastError());
 }
 
-__global__ void inter_kernel(int NX, float *X, int NY, float *Y, int B, float *OUT)
+__global__ void inter_kernel(int NX, float *X, int NY, float *Y, int B, float *_OUT)
 {
     int i = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
     if(i < (NX+NY)*B){
         int b = i / (NX+NY);
         int j = i % (NX+NY);
         if (j < NX){
-            OUT[i] = X[b*NX + j];
+			_OUT[i] = X[b*NX + j];
         } else {
-            OUT[i] = Y[b*NY + j - NX];
+			_OUT[i] = Y[b*NY + j - NX];
         }
     }
 }
 
-extern "C" void inter_gpu(int NX, float *X, int NY, float *Y, int B, float *OUT)
+extern "C" void inter_gpu(int NX, float *X, int NY, float *Y, int B, float *_OUT)
 {
-    inter_kernel<<<cuda_gridsize((NX+NY)*B), BLOCK>>>(NX, X, NY, Y, B, OUT);
+    inter_kernel<<<cuda_gridsize((NX+NY)*B), BLOCK>>>(NX, X, NY, Y, B, _OUT);
     check_error(cudaPeekAtLastError());
 }
 

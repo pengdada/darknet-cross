@@ -1,10 +1,12 @@
 #include "darknet.h"
-
+#ifdef _WIN32
+#else
 #include <unistd.h>
+#endif
 
 int inverted = 1;
 int noi = 1;
-static const int nind = 2;
+#define nind  2
 
 typedef struct {
     char **data;

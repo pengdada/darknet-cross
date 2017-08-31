@@ -3,7 +3,11 @@
 #include <string.h>
 #include <math.h>
 #include <assert.h>
+#ifdef _WIN32
+#include <time.h>
+#else
 #include <unistd.h>
+#endif
 #include <float.h>
 #include <limits.h>
 #include <time.h>
@@ -12,9 +16,13 @@
 
 double what_time_is_it_now()
 {
+#ifdef _WIN32
+	return GetTickCount();
+#else
     struct timespec now;
     clock_gettime(CLOCK_REALTIME, &now);
     return now.tv_sec + now.tv_nsec*1e-9;
+#endif
 }
 
 int *read_intlist(char *gpu_list, int *ngpus, int d)
@@ -55,8 +63,9 @@ int *read_map(char *filename)
     return map;
 }
 
-void sorta_shuffle(void *arr, size_t n, size_t size, size_t sections)
+void sorta_shuffle(void *_arr, size_t n, size_t size, size_t sections)
 {
+	char* arr = (char*)_arr;
     size_t i;
     for(i = 0; i < sections; ++i){
         size_t start = n*i/sections;
@@ -66,8 +75,9 @@ void sorta_shuffle(void *arr, size_t n, size_t size, size_t sections)
     }
 }
 
-void shuffle(void *arr, size_t n, size_t size)
+void shuffle(void *_arr, size_t n, size_t size)
 {
+	char* arr = (char*)_arr;
     size_t i;
     void *swp = calloc(1, size);
     for(i = 0; i < n-1; ++i){
